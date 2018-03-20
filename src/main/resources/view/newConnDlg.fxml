@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="326.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pt.zenit.ctlper.controller.NewConnDialogController">
+   <children>
+      <GridPane layoutX="22.0" layoutY="14.0" prefHeight="107.0" prefWidth="559.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="274.0" minWidth="10.0" prefWidth="118.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="518.0" minWidth="10.0" prefWidth="441.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <TextField GridPane.columnIndex="1" GridPane.rowIndex="1" fx:id="connName" />
+            <TextField GridPane.columnIndex="1" fx:id="jdbThin"/>
+            <Label text="Connection Name:" />
+            <Label text="JDBC Thin Url:" GridPane.rowIndex="1" />
+         </children>
+      </GridPane>
+      <Button layoutX="514.0" layoutY="276.0" mnemonicParsing="false" text="Adicionar" onAction="#handleOk" />
+      <Button layoutX="462.0" layoutY="276.0" mnemonicParsing="false" text="TEST!" textFill="RED" onAction="#handleTest" />
+      <Button layoutX="392.0" layoutY="276.0" mnemonicParsing="false" text="Cancelar" onAction="#handleCancel" />
+      <Label layoutX="22.0" layoutY="142.0" text="hostname:" />
+      <Label layoutX="185.0" layoutY="142.0" text="port:" />
+      <Label layoutX="22.0" layoutY="200.0" text="username:" />
+      <Label layoutX="22.0" layoutY="259.0" text="password:" />
+      <TextField layoutX="22.0" layoutY="159.0" fx:id="address" />
+      <TextField layoutX="185.0" layoutY="159.0" prefHeight="25.0" prefWidth="61.0" fx:id="port" />
+      <TextField layoutX="22.0" layoutY="217.0" fx:id="username" />
+      <PasswordField layoutX="22.0" layoutY="276.0" fx:id="password"/>
+   </children>
+</Pane>
