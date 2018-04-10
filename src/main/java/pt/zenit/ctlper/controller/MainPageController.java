@@ -88,7 +88,7 @@ public class MainPageController implements Initializable {
         });
 
         btnRemoveConn.setOnAction(e -> {
-            prefs.remove("jdbc.conn."+connCombo.getSelectionModel().getSelectedItem().getLabel());
+            prefs.remove(CONN_PREFIX+connCombo.getSelectionModel().getSelectedItem().getLabel());
             initConnCombo(connCombo, prefs);
         });
 
@@ -136,6 +136,18 @@ public class MainPageController implements Initializable {
 
                 }
             }
+            connCombo.setButtonCell(new ListCell<ComboBoxItem>() {
+                @Override
+                protected void updateItem(ComboBoxItem t, boolean bln) {
+                    super.updateItem(t, bln);
+                    if (bln) {
+                        setText("");
+                    } else {
+                        setText(t.getLabel());
+                    }
+                }
+            });
+
             connCombo.setCellFactory(listView -> new ListCell<ComboBoxItem>() {
                 @Override
                 public void updateItem(ComboBoxItem item, boolean empty) {
