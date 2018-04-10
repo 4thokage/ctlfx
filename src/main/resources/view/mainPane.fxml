@@ -19,23 +19,24 @@
         <menus>
           <Menu mnemonicParsing="false" text="Options">
             <items>
-              <MenuItem mnemonicParsing="false" text="Settings (Ctrl+Alt+S)" />
+              <MenuItem fx:id="settingsMenu" mnemonicParsing="false" text="Settings (Ctrl+Alt+S)" />
             </items>
           </Menu>
         </menus>
       </MenuBar>
-      <TreeTableView fx:id="tableHelper" layoutX="14.0" layoutY="100.0" prefHeight="255.0" prefWidth="368.0">
+      <TreeTableView fx:id="tableHelper" layoutX="14.0" layoutY="74.0" prefHeight="281.0" prefWidth="368.0">
           <placeholder>
               <Label text="Nadia" />
           </placeholder>
       </TreeTableView>
       <Button fx:id="btnGenerate" accessibleHelp="Ctrl+Enter" layoutX="397.0" layoutY="362.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="180.0" text="B0ta!" />
-      <Label layoutX="14.0" layoutY="35.0" text="DB:" />
-      <Button fx:id="btnAddNewConn" layoutX="257.0" layoutY="61.0" mnemonicParsing="false" text="Add new connection" />
-      <ComboBox fx:id="connCombo" layoutX="14.0" layoutY="61.0" prefHeight="25.0" prefWidth="237.0" promptText="Pick a DB connection..." />
+      <Label layoutX="13.0" layoutY="44.0" text="DB:" />
+      <Button fx:id="btnAddNewConn" layoutX="257.0" layoutY="40.0" mnemonicParsing="false" text="Add new connection" />
+      <ComboBox fx:id="connCombo" layoutX="37.0" layoutY="40.0" prefHeight="25.0" prefWidth="180.0" promptText="Pick a DB connection..." />
       <ProgressBar fx:id="progress" layoutX="14.0" layoutY="365.0" prefHeight="18.0" prefWidth="368.0" progress="0.0" />
       <CheckBox fx:id="isExtract" layoutX="397.0" layoutY="307.0" mnemonicParsing="false" text="Extract" />
       <CheckBox fx:id="isLoad" layoutX="397.0" layoutY="281.0" mnemonicParsing="false" selected="true" text="Load" />
-      <Label layoutX="14.0" layoutY="379.0" text="Waiting for action..." />
+      <Label layoutX="14.0" layoutY="379.0" text="..." />
+      <Button fx:id="btnRemoveConn" layoutX="224.0" layoutY="40.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="27.0" text="X" textFill="RED" />
    </children>
 </Pane>

@@ -1,9 +1,9 @@
-$opts.headerOptions
+$opts.ctlLoaderHeader
 LOAD DATA
-$opts.charSet
+$opts.ctlLoaderCharSet
 infile * "fix $maxLength"
-$opts.loadType
-INTO TABLE CHANGEME!!.$tableName
+$opts.ctlLoaderType
+INTO TABLE ${table.owner}.${table.name}
 (
-#foreach($column in $allColumns)$column.name                    POSITION ($column.startPosition:$column.endPosition)#if( $foreach.hasNext ),#end$nl#end
+#foreach($column in $allColumns)${tab}$column.name POSITION ($column.startPosition:$column.endPosition)#if( $foreach.hasNext ),#end -- len = ${column.lengthValue}, type = ${column.dataType} ${nl}#end
 )	

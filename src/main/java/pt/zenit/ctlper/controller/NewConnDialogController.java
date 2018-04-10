@@ -3,18 +3,20 @@ package pt.zenit.ctlper.controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.sql.DriverManager;
+import pt.zenit.ctlper.repository.JDBCRepository;
+
 import java.sql.SQLException;
 
 /**
- * Dialog to edit details of a person.
- *
- * @author Marco Jakob
+ * Controlla a dialog de nova conexão
  */
 public class NewConnDialogController {
 
@@ -23,7 +25,7 @@ public class NewConnDialogController {
     @FXML
     private TextField connName;
     @FXML
-    private TextField jdbThin;
+    private TextField jdbcThin;
     @FXML
     private TextField username;
     @FXML
@@ -33,7 +35,10 @@ public class NewConnDialogController {
     @FXML
     private TextField port;
     @FXML
-    private TextField SID;
+    private TextField sid;
+
+    @FXML
+    private Button btnTest;
 
 
     private Stage dialogStage;
@@ -52,7 +57,7 @@ public class NewConnDialogController {
     /**
      * Sets the stage of this dialog.
      *
-     * @param dialogStage
+     * @param dialogStage stage to set
      */
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
@@ -60,9 +65,7 @@ public class NewConnDialogController {
 
 
     /**
-     * Returns true if the user clicked OK, false otherwise.
-     *
-     * @return
+     * @return Returns true if the user clicked OK, false otherwise.
      */
     public boolean isOkClicked() {
         return okClicked;
@@ -73,10 +76,17 @@ public class NewConnDialogController {
      */
     @FXML
     private void handleOk() {
-        if (isInputValid()) {
+        handleTest();
+        if (btnTest.getTextFill().equals(Paint.valueOf("green"))) {
             PreferencesController.getPrefs().put("jdbc.conn."+connName.getText(), connString);
             okClicked = true;
             dialogStage.close();
+        } else {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.initOwner(dialogStage);
+            alert.setTitle("No can do!");
+            alert.setHeaderText("A conn n presta br0!");
+            alert.showAndWait();
         }
     }
 
@@ -85,8 +95,12 @@ public class NewConnDialogController {
      */
     @FXML
     private void handleTest() {
-        if (isInputValid() && testConnection(connString)) {
+        if(isInputValid() && testConnection(connString)) {
+            btnTest.setTextFill(Paint.valueOf("green"));
+        } else {
+            btnTest.setTextFill(Paint.valueOf("red"));
         }
+
     }
 
     /**
@@ -106,12 +120,12 @@ public class NewConnDialogController {
         String errorMessage = "";
 
         //TODO jsr: validar se a jdbc vem com user e pass duma melhor forma
-        if(jdbThin.getText() != null && !jdbThin.getText().contains("//")) {
-            connString = jdbThin.getText();
-        } else if(jdbThin.getText().contains("//")) {
-            connString = jdbThin.getText().replaceAll("//", username.getText() + "/"+password.getText());
-        } else if(username.getText() != null && password.getText() != null && SID.getText() != null){
-            connString = String.format("jdbc:oracle:thin:%s/%s@%s:%s/%s",username.getText(), password.getText(), address.getText(), port.getText(), SID.getText());
+        if(StringUtils.isNotBlank(jdbcThin.getText()) && !jdbcThin.getText().contains("//")) {
+            connString = jdbcThin.getText();
+        } else if(jdbcThin.getText().contains("//")) {
+            connString = jdbcThin.getText().replaceAll("//", username.getText() + "/"+password.getText());
+        } else if(username.getText() != null && password.getText() != null && sid.getText() != null){
+            connString = String.format("jdbc:oracle:thin:%s/%s@%s:%s/%s",username.getText(), password.getText(), address.getText(), port.getText(), sid.getText());
         } else {
             errorMessage += "INVALID!";
         }
@@ -122,11 +136,10 @@ public class NewConnDialogController {
         if (errorMessage.length() == 0) {
             return true;
         } else {
-            // Show the error message.
             Alert alert = new Alert(AlertType.ERROR);
             alert.initOwner(dialogStage);
-            alert.setTitle("Cenas mal");
-            alert.setHeaderText("Ve la bem");
+            alert.setTitle("Something wrong");
+            alert.setHeaderText("Please check all fields br0");
             alert.setContentText(errorMessage);
 
             alert.showAndWait();
@@ -137,9 +150,10 @@ public class NewConnDialogController {
 
     private boolean testConnection(String connString) {
         try {
-            DriverManager.getConnection(connString);
-        } catch (SQLException e) {
-            LOG.error("FAILED TESTING: [{}]",connString);
+            JDBCRepository.disconnect();
+            JDBCRepository.connect(PreferencesController.DEFAULT_DRIVER ,connString);
+        } catch (SQLException | ClassNotFoundException e) {
+            LOG.error("FAILED TESTING: [{}]",connString, e);
             return false;
         }
         return true;

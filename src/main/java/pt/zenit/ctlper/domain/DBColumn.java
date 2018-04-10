@@ -1,13 +1,13 @@
 package pt.zenit.ctlper.domain;
 
-import pt.zenit.ctlper.enums.PadType;
+import pt.zenit.ctlper.enums.PadTypes;
 
 /**
  * Representa uma coluna de uma tabela de DB
  */
 public class DBColumn {
 
-    private static final int DEFAULT_PRECISION = 8;
+    private static final int DEFAULT_PRECISION = 38;
 
     private String name;
     private String dataType;
@@ -33,16 +33,20 @@ public class DBColumn {
         return name;
     }
 
+    public String getDataType() {
+        return dataType;
+    }
+
     public int getLengthValue() {
         return isNumeric() ? this.dataPrecision : this.dataLength;
     }
 
     public String getPadChar() {
-        return isNumeric() ? PadType.LPAD.getPadChar() : PadType.RPAD.getPadChar();
+        return isNumeric() ? "'0'" : "' '";
     }
 
     public String getPadType() {
-        return isNumeric() ? PadType.LPAD.toString() : PadType.RPAD.toString();
+        return isNumeric() ? PadTypes.LPAD.toString() : PadTypes.RPAD.toString();
     }
 
     private boolean isNumeric() {
@@ -59,7 +63,11 @@ public class DBColumn {
 
 
     private boolean isValidObject() {
-        return getName() != null && getLengthValue() != 0 && getPadChar() != null && getPadType() != null;
+        return getName() != null
+                && getLengthValue() != 0
+                && getPadChar() != null
+                && getPadType() != null
+                && (getEndPosition() > getStartPosition());
     }
 
     public int getStartPosition() {

@@ -9,6 +9,7 @@ import javafx.scene.control.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pt.zenit.ctlper.Main;
+import pt.zenit.ctlper.domain.ComboBoxItem;
 import pt.zenit.ctlper.domain.DBTable;
 import pt.zenit.ctlper.repository.JDBCRepository;
 import java.net.URL;
@@ -29,7 +30,7 @@ public class MainPageController implements Initializable {
     private Main mainApp;
 
     @FXML //  fx:id="connCombo"
-    private ComboBox<String> connCombo;
+    private ComboBox<ComboBoxItem> connCombo;
 
     @FXML //  fx:id="tableHelper"
     private TreeTableView<DBTable> tableHelper;
@@ -39,6 +40,9 @@ public class MainPageController implements Initializable {
 
     @FXML // fx:id="btnGenerate"
     private Button btnGenerate;
+
+    @FXML // fx:id="btnRemoveConn"
+    private Button btnRemoveConn;
 
     @FXML // fx:id="btnAddNewConn"
     private Button btnAddNewConn;
@@ -52,6 +56,9 @@ public class MainPageController implements Initializable {
     @FXML // fx:id="isLoad"
     private CheckBox isLoad;
 
+    @FXML // fx:id="settingsMenu"
+    public MenuItem settingsMenu;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         assert connCombo != null : "fx:id=\"connCombo\" was not injected: check your FXML file 'mainPane.fxml'.";
@@ -62,34 +69,30 @@ public class MainPageController implements Initializable {
         assert isExtract != null : "fx:id=\"isExtract\" was not injected: check your FXML file 'mainPane.fxml'.";
         assert isLoad != null : "fx:id=\"isLoad\" was not injected: check your FXML file 'mainPane.fxml'.";
         assert btnAddNewConn != null : "fx:id=\"btnAddNewConn\" was not injected: check your FXML file 'mainPane.fxml'.";
+        assert settingsMenu != null : "fx:id=\"settingsMenu\" was not injected: check your FXML file 'mainPane.fxml'.";
+        assert btnRemoveConn != null : "fx:id=\"btnRemoveConn\" was not injected: check your FXML file 'mainPane.fxml'.";
 
-        Preferences prefs = PreferencesController.loadPreferences();
+
+
+        Preferences prefs = PreferencesController.loadDefaultPreferences();
         initConnCombo(connCombo, prefs);
-        
-        connCombo.getSelectionModel().selectedItemProperty().addListener((selected, oldVal, newVal) -> {
-            try {
-                JDBCRepository.disconnect();
-                JDBCRepository.connect(prefs.get("jdbc.driver", DEFAULT_DRIVER), connCombo.getSelectionModel().getSelectedItem());
-                ObservableList<DBTable> dbTables = FXCollections.observableArrayList(JDBCRepository.getDBInfo());
-                reloadTables(tableHelper, dbTables);
-            } catch (SQLException | ClassNotFoundException e) {
-                LOG.error("Error connecting to DB via JDBC", e);
-            }
-
-        });
-        connCombo.getSelectionModel().selectFirst();
-
 
         TreeTableView.TreeTableViewSelectionModel<DBTable> selection = tableHelper.getSelectionModel();
         selection.setSelectionMode(SelectionMode.MULTIPLE);
 
-        btnGenerate.setOnAction(e -> {
-            progress.setProgress(0);
-            CTLBuilder.build(tableHelper.getSelectionModel(), copyToClipboard.isSelected(), isLoad.isSelected(), isExtract.isSelected(), progress);
+        btnGenerate.setOnAction(e -> CTLBuilder.build(tableHelper.getSelectionModel(), copyToClipboard.isSelected(), isLoad.isSelected(), isExtract.isSelected(), progress));
+
+        btnAddNewConn.setOnAction(e -> {
+            mainApp.showNewConnDialog();
+            initConnCombo(connCombo, prefs);
         });
 
-        btnAddNewConn.setOnAction(e -> mainApp.showPersonEditDialog());
+        btnRemoveConn.setOnAction(e -> {
+            prefs.remove("jdbc.conn."+connCombo.getSelectionModel().getSelectedItem().getLabel());
+            initConnCombo(connCombo, prefs);
+        });
 
+        settingsMenu.setOnAction(t -> mainApp.showSettingsDialog());
 
     }
 
@@ -109,7 +112,7 @@ public class MainPageController implements Initializable {
 
         //Defining cell content
         column.setCellValueFactory((TreeTableColumn.CellDataFeatures<DBTable, String> p) -> {
-            String dataVal = p.getValue().getValue().getTableName() + "    [" +p.getValue().getValue().getOwner() + "]";
+            String dataVal = p.getValue().getValue().getName() + "    [" +p.getValue().getValue().getOwner() + "]";
             return new ReadOnlyStringWrapper(dataVal);
         });
 
@@ -121,18 +124,51 @@ public class MainPageController implements Initializable {
     }
 
 
-    private void initConnCombo(ComboBox<String> connCombo, Preferences prefs) {
+    private void initConnCombo(ComboBox<ComboBoxItem> connCombo, Preferences prefs) {
 
         try {
+            connCombo.getItems().clear();
             for(String key : prefs.keys()) {
                 if(key.startsWith(CONN_PREFIX)) {
-                    connCombo.getItems().add(prefs.get(key, "ERROR"));
+                    connCombo.getItems().addAll(
+                            new ComboBoxItem(key.replaceAll(CONN_PREFIX,""),prefs.get(key, "undefined")
+                    ));
+
                 }
             }
+            connCombo.setCellFactory(listView -> new ListCell<ComboBoxItem>() {
+                @Override
+                public void updateItem(ComboBoxItem item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        setText(null);
+                        setDisable(false);
+                        setVisible(false);
+                    } else {
+                        setText(item.getLabel());
+                        setDisable(false);
+                    }
+                }
+            });
+
+            connCombo.getSelectionModel().selectedItemProperty().addListener((selected, oldVal, newVal) -> tryConnection(connCombo, prefs));
+            connCombo.getSelectionModel().selectFirst();
         } catch (BackingStoreException e) {
             LOG.error("Erro a carregar as conexões", e);
         }
     }
+
+    private void tryConnection(ComboBox<ComboBoxItem> connCombo, Preferences prefs) {
+        try {
+            JDBCRepository.disconnect();
+            JDBCRepository.connect(prefs.get("jdbc.driver", DEFAULT_DRIVER), connCombo.getSelectionModel().getSelectedItem().getValue());
+            ObservableList<DBTable> dbTables = FXCollections.observableArrayList(JDBCRepository.getDBInfo());
+            reloadTables(tableHelper, dbTables);
+        } catch (SQLException | ClassNotFoundException e) {
+            LOG.error("Error connecting to DB via JDBC", e);
+        }
+    }
+
     /**
      * Is called by the main application to give a reference back to itself.
      *

@@ -5,12 +5,12 @@ package pt.zenit.ctlper.domain;
  */
 public class DBTable {
     private String owner;
-    private String tableName;
+    private String name;
     private String status;
 
-    public DBTable(String owner, String tableName, String status) {
+    public DBTable(String owner, String name, String status) {
         this.owner = owner;
-        this.tableName = tableName;
+        this.name = name;
         this.status = status;
     }
 
@@ -22,12 +22,12 @@ public class DBTable {
         this.owner = owner;
     }
 
-    public String getTableName() {
-        return tableName;
+    public String getName() {
+        return name;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getStatus() {

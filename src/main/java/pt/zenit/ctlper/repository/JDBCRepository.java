@@ -17,7 +17,7 @@
 
         private static final Logger LOG = LoggerFactory.getLogger(JDBCRepository.class);
 
-        private static final String DB_INFO_QUERY = "SELECT OWNER,TABLE_NAME,STATUS FROM all_tables WHERE OWNER NOT IN ('SYS', 'MDSYS','CTXSYS','APEX_040000','XDB','SYSTEM')";
+        private static final String DB_INFO_QUERY = "SELECT OWNER,TABLE_NAME,STATUS FROM all_tables WHERE OWNER NOT IN ('SYS', 'MDSYS','CTXSYS','XDB','SYSTEM', 'EXFSYS','OLAPSYS') AND OWNER NOT LIKE 'APEX_%'";
         private static final String TABLE_INFO_QUERY = "SELECT column_name,data_type,data_length,data_precision FROM all_tab_columns WHERE TABLE_NAME = ? ORDER BY COLUMN_ID";
 
         //Connection
@@ -45,7 +45,7 @@
             try {
                 conn = DriverManager.getConnection(connString);
             } catch (SQLException e) {
-                LOG.error("Connection Failed! Check output console" + e);
+                LOG.error("Connection Failed! Check output console",e);
                 throw e;
             }
         }

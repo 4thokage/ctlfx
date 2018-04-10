@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pt.zenit.ctlper.domain.DBTable;
 import pt.zenit.ctlper.domain.DBColumn;
-import pt.zenit.ctlper.enums.CTLType;
+import pt.zenit.ctlper.enums.CTLTypes;
 import pt.zenit.ctlper.repository.JDBCRepository;
 import java.io.*;
 import java.util.Collection;
@@ -43,17 +43,18 @@ class CTLBuilder {
     private CTLBuilder() {}
 
     static void build(TreeTableView.TreeTableViewSelectionModel<DBTable> selectionModel, Boolean copyToClipboard, boolean isLoad, boolean isExtract, ProgressBar progress) {
+        progress.setProgress(0);
         if(!selectionModel.getSelectedItems().isEmpty()) {
-        double eachPercentage = 1/selectionModel.getSelectedItems().size();
+            double eachPercentage = 1/selectionModel.getSelectedItems().size();
 
             for(TreeItem<DBTable> table : selectionModel.getSelectedItems()) {
-                String tableName = table.getValue().getTableName();
-                Collection<DBColumn> tablesInfo = prepareColumnPositions(JDBCRepository.getTableInfo(tableName));
+                DBTable dbTable = table.getValue();
+                Collection<DBColumn> tableColumns = prepareColumnPositions(JDBCRepository.getTableInfo(dbTable.getName()));
                 if(isExtract) {
-                    generateCTL(tableName, tablesInfo, CTLType.EXTRACT, copyToClipboard);
+                    generateCTL(dbTable, tableColumns, CTLTypes.EXTRACT, copyToClipboard);
                 }
                 if(isLoad) {
-                    generateCTL(tableName, tablesInfo, CTLType.LOAD, copyToClipboard);
+                    generateCTL(dbTable, tableColumns, CTLTypes.LOAD, copyToClipboard);
                 }
                 progress.setProgress(progress.getProgress()+eachPercentage);
             }
@@ -62,15 +63,16 @@ class CTLBuilder {
 
     }
 
-    private static void generateCTL(String tableName, Collection<DBColumn> tablesInfo, CTLType ctlType, Boolean copyToClipboard) {
+    private static void generateCTL(DBTable dbTable, Collection<DBColumn> tableColumns, CTLTypes ctlType, Boolean copyToClipboard) {
 
         Template t = ve.getTemplate(String.format("/velocityTemplates/CTL_%s.vm",ctlType.toString()));
 
         VelocityContext context = new VelocityContext();
-        context.put("tableName", tableName);
-        context.put("allColumns", tablesInfo);
+        context.put("table", dbTable);
+        context.put("allColumns", tableColumns);
         context.put("nl", "\n");
-        context.put("maxLength", getMaxLength(tablesInfo));
+        context.put("tab", "\t");
+        context.put("maxLength", getMaxLength(tableColumns));
         context.put("opts", PreferencesController.buildOptions());
 
         StringWriter writer = new StringWriter();
@@ -86,10 +88,10 @@ class CTLBuilder {
             }
         } else {
             try (Writer fileWriter = new BufferedWriter(new OutputStreamWriter(
-                    new FileOutputStream(String.format("%s_%s.ctl", ctlType.toString(), tableName)), "utf-8"))) {
+                    new FileOutputStream(String.format("%s_%s.ctl", ctlType.toString(), dbTable.getName())), "utf-8"))) {
                 fileWriter.write(ctlString);
             } catch (IOException e) {
-                LOG.error("Erro a escrever o ficheiro CTL da tabela {}, exeção: ", tableName, e);
+                LOG.error("Erro a escrever o ficheiro CTL da tabela {}, exeção: ", dbTable, e);
             }
         }
     }
