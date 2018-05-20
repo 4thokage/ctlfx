@@ -1,7 +1,7 @@
-package pt.zenit.ctlper.domain;
+package pt.zenit.oracle.ctlfx.domain;
 
 /**
- * Representa um item duma combobox (acho que é generic enough pa tud)
+ * Reprents a JavaFX ComboBox simple item
  */
 public class ComboBoxItem {
 

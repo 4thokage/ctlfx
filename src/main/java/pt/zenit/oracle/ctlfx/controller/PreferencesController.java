@@ -1,13 +1,11 @@
-package pt.zenit.ctlper.controller;
+package pt.zenit.oracle.ctlfx.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pt.zenit.ctlper.domain.CTLOptions;
-
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-public class PreferencesController {
+class PreferencesController {
 
     private static final Logger LOG = LoggerFactory.getLogger(PreferencesController.class);
 
@@ -16,23 +14,26 @@ public class PreferencesController {
 
     private PreferencesController() {}
 
-    //TODO jsr: Is there a better way to store user settings?
     static Preferences loadDefaultPreferences() {
         prefs = Preferences.userRoot().node(PreferencesController.class.getName());
         prefs.put("jdbc.driver", DEFAULT_DRIVER);
-        prefs.put("jdbc.conn.LOCAL", "jdbc:oracle:thin:CLICLI/CLICLI@localhost:1521/xe");
-        //prefs.put("jdbc.conn.GE5T01", "jdbc:oracle:thin:PIPJIPJ1/vzwwaYk2qVOFdH@127.0.0.1:6002:GE5T01");
-        //prefs.put("jdbc.conn.ISORPR1T", "jdbc:oracle:thin:PISORPR1/Pisorpr1C41x4_@bkoradbt01-vip.lacaixa.es:1554/ISORPR1T");
+        prefs.put("pad.char.numeric", "'0'");
+        prefs.put("pad.type.numeric", "LPAD");
+        prefs.put("pad.char.string", "' '");
+        prefs.put("pad.type.string", "RPAD");
 
         return prefs;
     }
 
-    public static Preferences getPrefs() {
+    static Preferences getPrefs() {
         return prefs != null ? prefs : loadDefaultPreferences();
     }
 
-    static CTLOptions buildOptions() {
-        return new CTLOptions.CTLOptionsBuilder().build();
+    static void saveSettings(String padCharNumeric, String padCharString, String padTypeNumeric, String padTypeString) {
+        prefs.put("pad.char.numeric", padCharNumeric);
+        prefs.put("pad.type.numeric", padTypeNumeric);
+        prefs.put("pad.char.string", padCharString);
+        prefs.put("pad.type.string", padTypeString);
     }
 
     static void softReset() {

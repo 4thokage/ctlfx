@@ -1,1 +1,0 @@
-SELECT${nl}#foreach( $column in $allColumns )${tab}NVL(${column.padType}($column.name,$column.lengthValue,$column.padChar), ${column.padType}($column.padChar,$column.lengthValue,$column.padChar)) #if( $foreach.hasNext )||#end${nl}#end FROM ${table.name};

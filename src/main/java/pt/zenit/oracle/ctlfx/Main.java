@@ -1,4 +1,4 @@
-package pt.zenit.ctlper;
+package pt.zenit.oracle.ctlfx;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -10,16 +10,15 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pt.zenit.ctlper.controller.MainPageController;
-import pt.zenit.ctlper.controller.NewConnDialogController;
-import pt.zenit.ctlper.controller.PreferencesDialogController;
-
+import pt.zenit.oracle.ctlfx.controller.MainPageController;
+import pt.zenit.oracle.ctlfx.controller.NewConnDialogController;
+import pt.zenit.oracle.ctlfx.controller.PreferencesDialogController;
 import java.io.IOException;
 import java.net.URL;
 
 public class Main extends Application {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Main.class);
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     private Stage primaryStage;
 
@@ -27,7 +26,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws IOException{
         URL mainFxml = getClass().getResource("/view/mainPane.fxml");
         if(mainFxml == null) {
-            LOG.error("Error loading main fxml scene");
+            logger.error("Error loading main fxml scene");
             return;
         }
         FXMLLoader loader = new FXMLLoader();
@@ -37,7 +36,7 @@ public class Main extends Application {
         controller.setMainApp(this);
 
         this.primaryStage = primaryStage;
-        primaryStage.setTitle("CTLper");
+        primaryStage.setTitle("CTL-FX");
         primaryStage.setScene(new Scene(root, 600, 400));
         primaryStage.setResizable(false);
         primaryStage.getScene().setOnKeyPressed(k -> {
@@ -69,10 +68,7 @@ public class Main extends Application {
 
             // Create the dialog Stage.
             Stage dialogStage = new Stage();
-            dialogStage.setTitle("Nova Conexão");
-            dialogStage.initModality(Modality.WINDOW_MODAL);
-            dialogStage.initOwner(primaryStage);
-            Scene scene = new Scene(page);
+            Scene scene = setupScene(page, dialogStage, "Add new Connection");
             dialogStage.setScene(scene);
 
             // Set the person into the controller.
@@ -84,7 +80,7 @@ public class Main extends Application {
 
             return controller.isOkClicked();
         } catch (IOException e) {
-            LOG.error("Error showing 'add new connection' dialog", e);
+            logger.error("Error showing 'add new connection' dialog", e);
             return false;
         }
     }
@@ -101,10 +97,7 @@ public class Main extends Application {
 
             // Create the dialog Stage.
             Stage dialogStage = new Stage();
-            dialogStage.setTitle("S");
-            dialogStage.initModality(Modality.WINDOW_MODAL);
-            dialogStage.initOwner(primaryStage);
-            Scene scene = new Scene(page);
+            Scene scene = setupScene(page, dialogStage, "Settings");
             scene.setOnKeyPressed(event -> {
                 if("ESCAPE".equalsIgnoreCase(event.getCode().toString())) {
                     //TODO jsr : save settinggs b4
@@ -120,7 +113,15 @@ public class Main extends Application {
             // Show the dialog and wait until the user closes it
             dialogStage.showAndWait();
         } catch (IOException e) {
-            LOG.error("Error showing settings dialog", e);
+            logger.error("Error showing settings dialog", e);
         }
+    }
+
+    private Scene setupScene(Pane page, Stage dialogStage, String title) {
+        dialogStage.setTitle(title);
+        dialogStage.initModality(Modality.WINDOW_MODAL);
+        dialogStage.initOwner(primaryStage);
+        dialogStage.setResizable(false);
+        return new Scene(page);
     }
 }

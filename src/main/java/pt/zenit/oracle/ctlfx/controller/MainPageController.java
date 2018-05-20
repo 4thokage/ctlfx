@@ -1,4 +1,4 @@
-package pt.zenit.ctlper.controller;
+package pt.zenit.oracle.ctlfx.controller;
 
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -8,10 +8,12 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pt.zenit.ctlper.Main;
-import pt.zenit.ctlper.domain.ComboBoxItem;
-import pt.zenit.ctlper.domain.DBTable;
-import pt.zenit.ctlper.repository.JDBCRepository;
+import pt.zenit.oracle.ctl.domain.CTLOptions;
+import pt.zenit.oracle.ctlfx.Main;
+import pt.zenit.oracle.ctlfx.domain.ComboBoxItem;
+import pt.zenit.oracle.ctlfx.repository.JDBCRepository;
+import pt.zenit.oracle.ctl.domain.DBTable;
+
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -19,12 +21,9 @@ import java.util.ResourceBundle;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-import static pt.zenit.ctlper.controller.PreferencesController.DEFAULT_DRIVER;
-
 public class MainPageController implements Initializable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MainPageController.class);
-
+    private static final Logger logger = LoggerFactory.getLogger(MainPageController.class);
     private static final String CONN_PREFIX ="jdbc.conn.";
 
     private Main mainApp;
@@ -47,9 +46,6 @@ public class MainPageController implements Initializable {
     @FXML // fx:id="btnAddNewConn"
     private Button btnAddNewConn;
 
-    @FXML // fx:id="progress"
-    private ProgressBar progress;
-
     @FXML // fx:id="isExtract"
     private CheckBox isExtract;
 
@@ -59,19 +55,18 @@ public class MainPageController implements Initializable {
     @FXML // fx:id="settingsMenu"
     public MenuItem settingsMenu;
 
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         assert connCombo != null : "fx:id=\"connCombo\" was not injected: check your FXML file 'mainPane.fxml'.";
         assert tableHelper != null : "fx:id=\"tableHelper\" was not injected: check your FXML file 'mainPane.fxml'.";
         assert copyToClipboard != null : "fx:id=\"copyToClipboard\" was not injected: check your FXML file 'mainPane.fxml'.";
         assert btnGenerate != null : "fx:id=\"btnGenerate\" was not injected: check your FXML file 'mainPane.fxml'.";
-        assert progress != null : "fx:id=\"progress\" was not injected: check your FXML file 'mainPane.fxml'.";
         assert isExtract != null : "fx:id=\"isExtract\" was not injected: check your FXML file 'mainPane.fxml'.";
         assert isLoad != null : "fx:id=\"isLoad\" was not injected: check your FXML file 'mainPane.fxml'.";
         assert btnAddNewConn != null : "fx:id=\"btnAddNewConn\" was not injected: check your FXML file 'mainPane.fxml'.";
         assert settingsMenu != null : "fx:id=\"settingsMenu\" was not injected: check your FXML file 'mainPane.fxml'.";
         assert btnRemoveConn != null : "fx:id=\"btnRemoveConn\" was not injected: check your FXML file 'mainPane.fxml'.";
-
 
 
         Preferences prefs = PreferencesController.loadDefaultPreferences();
@@ -80,7 +75,7 @@ public class MainPageController implements Initializable {
         TreeTableView.TreeTableViewSelectionModel<DBTable> selection = tableHelper.getSelectionModel();
         selection.setSelectionMode(SelectionMode.MULTIPLE);
 
-        btnGenerate.setOnAction(e -> CTLBuilder.build(tableHelper.getSelectionModel(), copyToClipboard.isSelected(), isLoad.isSelected(), isExtract.isSelected(), progress));
+        btnGenerate.setOnAction(e -> CTLBuilderFX.build(tableHelper.getSelectionModel(), copyToClipboard.isSelected(), isLoad.isSelected(), isExtract.isSelected(), new CTLOptions.CTLOptionsBuilder().build()));
 
         btnAddNewConn.setOnAction(e -> {
             mainApp.showNewConnDialog();
@@ -110,7 +105,6 @@ public class MainPageController implements Initializable {
             root.getChildren().add(new TreeItem<>(table));
         }
 
-        //Defining cell content
         column.setCellValueFactory((TreeTableColumn.CellDataFeatures<DBTable, String> p) -> {
             String dataVal = p.getValue().getValue().getName() + "    [" +p.getValue().getValue().getOwner() + "]";
             return new ReadOnlyStringWrapper(dataVal);
@@ -124,6 +118,12 @@ public class MainPageController implements Initializable {
     }
 
 
+    /**
+     * Initializes the connections combo box
+     *
+     * @param connCombo
+     * @param prefs
+     */
     private void initConnCombo(ComboBox<ComboBoxItem> connCombo, Preferences prefs) {
 
         try {
@@ -166,18 +166,24 @@ public class MainPageController implements Initializable {
             connCombo.getSelectionModel().selectedItemProperty().addListener((selected, oldVal, newVal) -> tryConnection(connCombo, prefs));
             connCombo.getSelectionModel().selectFirst();
         } catch (BackingStoreException e) {
-            LOG.error("Erro a carregar as conexões", e);
+            logger.error("Erro a carregar as conexões", e);
         }
     }
 
+    /**
+     * Attempts a db connection via {@link JDBCRepository} and choosen driver classpath
+     *
+     */
     private void tryConnection(ComboBox<ComboBoxItem> connCombo, Preferences prefs) {
-        try {
-            JDBCRepository.disconnect();
-            JDBCRepository.connect(prefs.get("jdbc.driver", DEFAULT_DRIVER), connCombo.getSelectionModel().getSelectedItem().getValue());
-            ObservableList<DBTable> dbTables = FXCollections.observableArrayList(JDBCRepository.getDBInfo());
-            reloadTables(tableHelper, dbTables);
-        } catch (SQLException | ClassNotFoundException e) {
-            LOG.error("Error connecting to DB via JDBC", e);
+        if(prefs != null && connCombo != null && connCombo.getSelectionModel() != null && connCombo.getSelectionModel().getSelectedItem() != null) {
+            try {
+                JDBCRepository.disconnect();
+                JDBCRepository.connect(prefs.get("jdbc.driver", PreferencesController.DEFAULT_DRIVER), connCombo.getSelectionModel().getSelectedItem().getValue());
+                ObservableList<DBTable> dbTables = FXCollections.observableArrayList(JDBCRepository.getDBInfo());
+                reloadTables(tableHelper, dbTables);
+            } catch (SQLException | ClassNotFoundException e) {
+                logger.error("Error connecting to DB via JDBC", e);
+            }
         }
     }
 
@@ -190,6 +196,5 @@ public class MainPageController implements Initializable {
         this.mainApp = mainApp;
 
     }
-
 
 }

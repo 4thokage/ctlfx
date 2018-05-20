@@ -4,10 +4,17 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>pt.zenit</groupId>
-    <artifactId>ctlper</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <groupId>pt.zenit.oracle</groupId>
+    <artifactId>ctlfx</artifactId>
+    <version>0.0.2-RELEASE</version>
     <packaging>jar</packaging>
+
+    <repositories>
+        <repository>
+            <id>jsr nexus</id>
+            <url>https://nexus.jose-rodrigues.info/nexus/content/repositories/releases/</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -15,7 +22,6 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.8.0-alpha2</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -27,9 +33,14 @@
             <version>11.2.0</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.velocity</groupId>
-            <artifactId>velocity</artifactId>
-            <version>1.7</version>
+            <groupId>pt.zenit.oracle.ctl</groupId>
+            <artifactId>ctlbuilder</artifactId>
+            <version>0.0.1-RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.5</version>
         </dependency>
     </dependencies>
 
@@ -49,7 +60,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>pt.zenit.ctlper.Main</mainClass>
+                            <mainClass>pt.zenit.oracle.ctlfx.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

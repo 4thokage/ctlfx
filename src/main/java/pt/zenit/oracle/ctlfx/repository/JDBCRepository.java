@@ -1,17 +1,16 @@
-    package pt.zenit.ctlper.repository;
+    package pt.zenit.oracle.ctlfx.repository;
 
     import org.slf4j.Logger;
     import org.slf4j.LoggerFactory;
-    import pt.zenit.ctlper.domain.DBTable;
-    import pt.zenit.ctlper.domain.DBColumn;
-
+    import pt.zenit.oracle.ctl.domain.DBColumn;
+    import pt.zenit.oracle.ctl.domain.DBTable;
     import java.sql.*;
     import java.util.ArrayList;
     import java.util.Collection;
     import java.util.List;
 
     /**
-     * Implementação JDBC de uma classe de suporte e acesso a DB
+     * JDBC implementation reponsable for handling oracle DB connections
      */
     public class JDBCRepository implements Repository {
 
