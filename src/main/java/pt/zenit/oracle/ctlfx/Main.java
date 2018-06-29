@@ -55,62 +55,48 @@ public class Main extends Application {
 
     /**
      * Opens a dialog to edit details for the specified person. If the user
-     * clicks OK, the changes are saved into the provided person object and true
-     * is returned.
-     * @return true if the user clicked OK, false otherwise.
+     * clicks OK, the changes are saved into the provided Preferences node
      */
-    public boolean showNewConnDialog() {
+    public void showNewConnDialog() {
         try {
-            // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("/view/newConnDlg.fxml"));
             Pane page = loader.load();
 
-            // Create the dialog Stage.
             Stage dialogStage = new Stage();
             Scene scene = setupScene(page, dialogStage, "Add new Connection");
             dialogStage.setScene(scene);
 
-            // Set the person into the controller.
             NewConnDialogController controller = loader.getController();
             controller.setDialogStage(dialogStage);
 
-            // Show the dialog and wait until the user closes it
             dialogStage.showAndWait();
 
-            return controller.isOkClicked();
         } catch (IOException e) {
             logger.error("Error showing 'add new connection' dialog", e);
-            return false;
         }
     }
     /**
      * Opens a Dialog with user prefenreces and saves it on esc or close presse
-     * @return true if esc key is pressed, false otherwise
      */
     public void showSettingsDialog() {
         try {
-            // Load the fxml file and create a new stage for the popup dialog.
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("/view/preferencesDlg.fxml"));
             Pane page = loader.load();
 
-            // Create the dialog Stage.
             Stage dialogStage = new Stage();
             Scene scene = setupScene(page, dialogStage, "Settings");
             scene.setOnKeyPressed(event -> {
                 if("ESCAPE".equalsIgnoreCase(event.getCode().toString())) {
-                    //TODO jsr : save settinggs b4
                     dialogStage.close();
                 }
             });
             dialogStage.setScene(scene);
 
-            // Set the person into the controller.
             PreferencesDialogController controller = loader.getController();
             controller.setDialogStage(dialogStage);
 
-            // Show the dialog and wait until the user closes it
             dialogStage.showAndWait();
         } catch (IOException e) {
             logger.error("Error showing settings dialog", e);

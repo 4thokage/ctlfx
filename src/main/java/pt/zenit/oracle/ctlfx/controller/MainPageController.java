@@ -8,11 +8,12 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pt.zenit.helpers.db.DBInfo;
+import pt.zenit.helpers.db.JDBCRepository;
 import pt.zenit.oracle.ctl.domain.CTLOptions;
 import pt.zenit.oracle.ctlfx.Main;
 import pt.zenit.oracle.ctlfx.domain.ComboBoxItem;
-import pt.zenit.oracle.ctlfx.repository.JDBCRepository;
-import pt.zenit.oracle.ctl.domain.DBTable;
+import pt.zenit.helpers.db.domain.DBTable;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -179,7 +180,8 @@ public class MainPageController implements Initializable {
             try {
                 JDBCRepository.disconnect();
                 JDBCRepository.connect(prefs.get("jdbc.driver", PreferencesController.DEFAULT_DRIVER), connCombo.getSelectionModel().getSelectedItem().getValue());
-                ObservableList<DBTable> dbTables = FXCollections.observableArrayList(JDBCRepository.getDBInfo());
+                DBInfo info = new DBInfo(JDBCRepository.getConnection());
+                ObservableList<DBTable> dbTables = FXCollections.observableArrayList(info.getDBInfo());
                 reloadTables(tableHelper, dbTables);
             } catch (SQLException | ClassNotFoundException e) {
                 logger.error("Error connecting to DB via JDBC", e);

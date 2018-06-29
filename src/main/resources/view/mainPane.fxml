@@ -15,7 +15,7 @@
    <children>
       <MenuBar layoutY="2.0" prefHeight="25.0" prefWidth="590.0">
         <menus>
-          <Menu mnemonicParsing="false" text="Options">
+          <Menu id="optionsMenu" mnemonicParsing="false" text="Options">
             <items>
               <MenuItem fx:id="settingsMenu" mnemonicParsing="false" text="Settings (Ctrl+Alt+S)" />
             </items>

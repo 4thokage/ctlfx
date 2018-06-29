@@ -7,12 +7,13 @@ import javafx.scene.input.ClipboardContent;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pt.zenit.helpers.db.DBInfo;
+import pt.zenit.helpers.db.JDBCRepository;
+import pt.zenit.helpers.db.domain.DBTable;
 import pt.zenit.oracle.ctl.CTLBuilder;
 import pt.zenit.oracle.ctl.domain.CTLOptions;
-import pt.zenit.oracle.ctl.domain.DBColumn;
-import pt.zenit.oracle.ctl.domain.DBTable;
 import pt.zenit.oracle.ctl.enums.CTLTypesEnum;
-import pt.zenit.oracle.ctlfx.repository.JDBCRepository;
+import pt.zenit.helpers.db.domain.DBColumn;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +52,7 @@ class CTLBuilderFX {
             StringBuilder completeResultSB = new StringBuilder();
             for (TreeItem<DBTable> table : selectionModel.getSelectedItems()) {
                 DBTable dbTable = table.getValue();
-                Collection<DBColumn> tableColumns = JDBCRepository.getTableInfo(dbTable.getName());
+                Collection<DBColumn> tableColumns = new DBInfo(JDBCRepository.getConnection()).getTableInfo(dbTable.getName());
                 try {
                     generateCTL(copyToClipboard, isLoad, isExtract, opts, completeResultSB, dbTable, tableColumns);
                 } catch (IOException e) {
@@ -85,7 +86,7 @@ class CTLBuilderFX {
             if (copyToClipboard) {
                 completeResultSB.append(CTLBuilder.generateCTL(dbTable, tableColumns, CTLTypesEnum.LOAD, opts));
             } else {
-                FileUtils.writeStringToFile(new File(dbTable.getName()+"_L.ctl"), CTLBuilder.generateCTL(dbTable, tableColumns, CTLTypesEnum.EXTRACT, opts), Charset.defaultCharset());
+                FileUtils.writeStringToFile(new File(dbTable.getName()+"_L.ctl"), CTLBuilder.generateCTL(dbTable, tableColumns, CTLTypesEnum.LOAD, opts), Charset.defaultCharset());
             }
         }
     }

@@ -12,7 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pt.zenit.oracle.ctlfx.enums.ErrorCodesEnum;
-import pt.zenit.oracle.ctlfx.repository.JDBCRepository;
+import pt.zenit.helpers.db.JDBCRepository;
 import java.sql.SQLException;
 
 /**

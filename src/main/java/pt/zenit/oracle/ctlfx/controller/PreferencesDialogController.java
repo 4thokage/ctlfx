@@ -45,8 +45,18 @@ public class PreferencesDialogController {
 
         btnClearPrefs.setOnAction(e -> PreferencesController.softReset());
 
+        btnSave.setDisable(true);
+        optsTextArea.setDisable(true);
+        btnSave.setOnAction(e -> PreferencesController.saveSettings(null, null, null, null));
+
     }
 
+    /**
+     * Initialez the Datatype and padType combos
+     *
+     * @param padTypeCombo {@link ComboBox} containing all {@link PadTypesEnum} values
+     * @param dataTypesCombo {@link ComboBox} containing all {@link DataTypesEnum} values
+     */
     private void initCombos(ComboBox<PadTypesEnum> padTypeCombo, ComboBox<DataTypesEnum> dataTypesCombo) {
         padTypeCombo.getItems().addAll(PadTypesEnum.values());
 
@@ -55,7 +65,11 @@ public class PreferencesDialogController {
         dataTypesCombo.getSelectionModel().selectFirst();
     }
 
-    //TODO jsr: falta arranjar uma forma de guardar prefs??
+    /**
+     * Loads the settings saved in user preferences
+     *
+     * @param selected the {@link DataTypesEnum} selected (observable)
+     */
     private void loadSettings(ObservableValue<? extends DataTypesEnum> selected) {
         Preferences prefs = PreferencesController.getPrefs();
         DataTypesEnum chosen = selected.getValue();
