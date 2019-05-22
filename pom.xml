@@ -107,5 +107,23 @@
             </testResource>
         </testResources>
     </build>
+         
+    <repository>
+        <id>repository-jsr</id>
+        <url>https://repo.jose-rodrigues.info/repository/snapshots/</url>
+        <releases>
+            <enabled>false</enabled>
+        </releases>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </repository>
+         <distributionManagement>
+                  <repository>
+                           <id>repository-jsr</id>
+                           <name>Public Snapshot Repository</name>
+                           <url>https://repo.jose-rodrigues.info/repository/snapshots/</url>
+                  </repository>
+         </distributionManagement>
 
 </project>
