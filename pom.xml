@@ -108,16 +108,18 @@
         </testResources>
     </build>
          
-    <repository>
-        <id>repository-jsr</id>
-        <url>https://repo.jose-rodrigues.info/repository/snapshots/</url>
-        <releases>
-            <enabled>false</enabled>
-        </releases>
-        <snapshots>
-            <enabled>true</enabled>
-        </snapshots>
-    </repository>
+    <repositories>     
+             <repository>
+                 <id>repository-jsr</id>
+                 <url>https://repo.jose-rodrigues.info/repository/snapshots/</url>
+                 <releases>
+                     <enabled>false</enabled>
+                 </releases>
+                 <snapshots>
+                     <enabled>true</enabled>
+                 </snapshots>
+             </repository>
+         </repositories>         
          <distributionManagement>
                   <repository>
                            <id>repository-jsr</id>
