@@ -11,6 +11,15 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v1
+      - name: prepare mvn settings
+        uses: s4u/maven-settings-action@v2.3.0
+        with:
+          servers: |
+            [{
+                "id": "github",
+                "username": "${{ secrets.USER_PACKAGE_ALL }}",
+                "password": "${{ secrets.TOKEN_PACKAGE_ALL }}"
+            }]
       - name: Build and Run Tests
         run: mvn test --batch-mode --fail-at-end
       - name: Publish Test Report
