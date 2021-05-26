@@ -118,7 +118,7 @@
         <repository>
             <id>github</id>
             <name>GitHub 4thokage Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/4thokage/db</url>
+            <url>https://maven.pkg.github.com/4thokage/ctlfx</url>
         </repository>
         <snapshotRepository>
             <id>binze-jsr</id>
