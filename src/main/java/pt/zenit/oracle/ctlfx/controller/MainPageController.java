@@ -14,6 +14,7 @@ import pt.zenit.oracle.ctl.domain.CTLOptions;
 import pt.zenit.oracle.ctlfx.Main;
 import pt.zenit.oracle.ctlfx.domain.ComboBoxItem;
 import pt.zenit.helpers.db.domain.DBTable;
+import pt.zenit.oracle.ctlfx.function.ConvertDBTable;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -76,7 +77,7 @@ public class MainPageController implements Initializable {
         TreeTableView.TreeTableViewSelectionModel<DBTable> selection = tableHelper.getSelectionModel();
         selection.setSelectionMode(SelectionMode.MULTIPLE);
 
-        btnGenerate.setOnAction(e -> CTLBuilderFX.build(tableHelper.getSelectionModel(), copyToClipboard.isSelected(), isLoad.isSelected(), isExtract.isSelected(), new CTLOptions.CTLOptionsBuilder().build()));
+        btnGenerate.setOnAction(e -> CTLBuilderFX.build(new ConvertDBTable().apply(selection.getSelectedItems()), copyToClipboard.isSelected(), isLoad.isSelected(), isExtract.isSelected(), new CTLOptions.CTLOptionsBuilder().build()));
 
         btnAddNewConn.setOnAction(e -> {
             mainApp.showNewConnDialog();
@@ -122,8 +123,8 @@ public class MainPageController implements Initializable {
     /**
      * Initializes the connections combo box
      *
-     * @param connCombo
-     * @param prefs
+     * @param connCombo connection combobox
+     * @param prefs connection preferences
      */
     private void initConnCombo(ComboBox<ComboBoxItem> connCombo, Preferences prefs) {
 
@@ -180,8 +181,8 @@ public class MainPageController implements Initializable {
             try {
                 JDBCRepository.disconnect();
                 JDBCRepository.connect(prefs.get("jdbc.driver", PreferencesController.DEFAULT_DRIVER), connCombo.getSelectionModel().getSelectedItem().getValue());
-                DBInfo info = new DBInfo(JDBCRepository.getConnection());
-                ObservableList<DBTable> dbTables = FXCollections.observableArrayList(info.getDBInfo());
+                DBInfo.setConn(JDBCRepository.getConnection());
+                ObservableList<DBTable> dbTables = FXCollections.observableArrayList(DBInfo.getDBInfo());
                 reloadTables(tableHelper, dbTables);
             } catch (SQLException | ClassNotFoundException e) {
                 logger.error("Error connecting to DB via JDBC", e);

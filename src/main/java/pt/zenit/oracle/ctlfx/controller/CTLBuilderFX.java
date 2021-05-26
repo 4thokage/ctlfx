@@ -9,11 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pt.zenit.helpers.db.DBInfo;
 import pt.zenit.helpers.db.JDBCRepository;
-import pt.zenit.helpers.db.domain.DBTable;
+
 import pt.zenit.oracle.ctl.CTLBuilder;
 import pt.zenit.oracle.ctl.domain.CTLOptions;
+import pt.zenit.oracle.ctl.domain.DBColumn;
+import pt.zenit.oracle.ctl.domain.DBTable;
 import pt.zenit.oracle.ctl.enums.CTLTypesEnum;
-import pt.zenit.helpers.db.domain.DBColumn;
+import pt.zenit.oracle.ctlfx.function.ConvertDBColumn;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +27,7 @@ import java.util.Collection;
  */
 class CTLBuilderFX {
 
-    private static final Logger logger = LoggerFactory.getLogger(MainPageController.class);
+    private static final Logger logger = LoggerFactory.getLogger(CTLBuilderFX.class);
 
 
     /**
@@ -41,27 +43,27 @@ class CTLBuilderFX {
      *
      * @param selectionModel  The tables selected in the TableView
      * @param copyToClipboard flag indicating that the LAST file should be copied to the clipboard
-     * @param isLoad          flag indicating that the progarm should generate a ctl of type LOAD
+     * @param isLoad          flag indicating that the program should generate a ctl of type LOAD
      * @param isExtract       flag indicating that the program should generate a ctl of type extract
-     * @return count {@link int} with how many files were generated
      */
-    static int build(TreeTableView.TreeTableViewSelectionModel<DBTable> selectionModel, Boolean copyToClipboard, boolean isLoad, boolean isExtract, CTLOptions opts) {
+    static void build(Collection<DBTable> selectionModel, Boolean copyToClipboard, boolean isLoad, boolean isExtract, CTLOptions opts) {
 
         int count = 0;
-        if (!selectionModel.getSelectedItems().isEmpty()) {
+        if (!selectionModel.isEmpty()) {
             StringBuilder completeResultSB = new StringBuilder();
-            for (TreeItem<DBTable> table : selectionModel.getSelectedItems()) {
-                DBTable dbTable = table.getValue();
-                Collection<DBColumn> tableColumns = new DBInfo(JDBCRepository.getConnection()).getTableInfo(dbTable.getName());
+            for (DBTable dbTable : selectionModel) {
+                DBInfo.setConn(JDBCRepository.getConnection());
+                Collection<pt.zenit.helpers.db.domain.DBColumn> dbColumns =DBInfo.getTableInfo(dbTable.getName());
+                Collection<DBColumn> tableCols = new ConvertDBColumn().apply(dbColumns);
                 try {
-                    generateCTL(copyToClipboard, isLoad, isExtract, opts, completeResultSB, dbTable, tableColumns);
+                    generateCTL(copyToClipboard, isLoad, isExtract, opts, completeResultSB, dbTable, tableCols);
                 } catch (IOException e) {
                     logger.error("Error writing CTL result to file", e);
                 }
                 count++;
 
             }
-            if(copyToClipboard) {
+            if(Boolean.TRUE.equals(copyToClipboard)) {
                 final Clipboard clipboard = Clipboard.getSystemClipboard();
                 final ClipboardContent content = new ClipboardContent();
                 content.putString(completeResultSB.toString());
@@ -69,13 +71,13 @@ class CTLBuilderFX {
 
             }
         }
+        logger.info("build count: {}", count);
 
-        return count;
     }
 
     private static void generateCTL(Boolean copyToClipboard, boolean isLoad, boolean isExtract, CTLOptions opts, StringBuilder completeResultSB, DBTable dbTable, Collection<DBColumn> tableColumns) throws IOException {
         if (isExtract) {
-            if (copyToClipboard) {
+            if (Boolean.TRUE.equals(copyToClipboard)) {
                 completeResultSB.append(CTLBuilder.generateCTL(dbTable, tableColumns, CTLTypesEnum.EXTRACT, opts));
             } else {
                 FileUtils.writeStringToFile(new File(dbTable.getName()+"_E.ctl"), CTLBuilder.generateCTL(dbTable, tableColumns, CTLTypesEnum.EXTRACT, opts), Charset.defaultCharset());
@@ -83,7 +85,7 @@ class CTLBuilderFX {
             }
         }
         if (isLoad) {
-            if (copyToClipboard) {
+            if (Boolean.TRUE.equals(copyToClipboard)) {
                 completeResultSB.append(CTLBuilder.generateCTL(dbTable, tableColumns, CTLTypesEnum.LOAD, opts));
             } else {
                 FileUtils.writeStringToFile(new File(dbTable.getName()+"_L.ctl"), CTLBuilder.generateCTL(dbTable, tableColumns, CTLTypesEnum.LOAD, opts), Charset.defaultCharset());

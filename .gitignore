@@ -1,6 +1,3 @@
 target/
 .idea/
-ojdbc6.jar
-runScanner.bat
-sonar-project.properties
-.scannerwork/
+*.iml
